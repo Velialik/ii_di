@@ -475,29 +475,84 @@
         renderTemplates(filteredTemplates);
       };
 
-      window.buyTemplate = function(templateId) {
-        const template = templates.find(t => t.id === templateId);
-        if (!template) {
-          tg.showAlert("Ошибка: Шаблон не найден.");
-          return;
-        }
-        const starsPrice = Math.round(template.price * 100); // 1 USD = 100 Stars
-        tg.MainButton.setText(`Купить за ${starsPrice} Stars`);
-        tg.MainButton.show();
-        tg.MainButton.onClick(() => {
-          // Имитация успешной оплаты
-          localStorage.setItem(`template_${templateId}`, JSON.stringify(template.config));
-          const blob = new Blob([JSON.stringify(template.config, null, 2)], { type: 'application/json' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `template_${templateId}.json`;
-          a.click();
-          URL.revokeObjectURL(url);
-          tg.showAlert(`Шаблон "${template.name}" куплен за ${starsPrice} Stars! Конфигурация скачана.`);
-          tg.MainButton.hide();
-        });
-      };
+// window.buyTemplate = function(templateId) {
+//   const template = templates.find(t => t.id === templateId);
+//   if (!template) return tg.showAlert("Ошибка: Шаблон не найден.");
+
+//   const starsPrice = Math.round(template.price * 100); // $7.49 → 749 Stars
+
+//   fetch('https://your-server.com/create-invoice',  {
+//     method: 'POST',
+//     headers: { 'Content-Type': 'application/json' },
+//     body: JSON.stringify({
+//       user_id: tg.initDataUnsafe.user.id,
+//       template_id: templateId,
+//       amount: starsPrice
+//     })
+//   }).then(res => res.json())
+//     .then(data => {
+//       Telegram.WebApp.showInvoice(data.invoice_url, {
+//         callback: function(result) {
+//           console.log("Payment result:", result);
+
+//           if (result.status === 'paid') {
+//             tg.showAlert(`✅ Оплата прошла! Скачивание конфигурации...`);
+
+//             // Сохраняем конфиг в localStorage или отправляем по API
+//             localStorage.setItem(`template_${templateId}`, JSON.stringify(template.config));
+
+//             // Создаём и скачиваем файл
+//             const blob = new Blob([JSON.stringify(template.config, null, 2)], {
+//               type: 'application/json'
+//             });
+//             const url = URL.createObjectURL(blob);
+//             const a = document.createElement('a');
+//             a.href = url;
+//             a.download = `${template.name.replace(/\s+/g, '_')}.json`;
+//             a.click();
+//             URL.revokeObjectURL(url);
+
+//           } else {
+//             tg.showAlert("❌ Оплата не прошла.");
+//           }
+//         }
+//       });
+//     });
+// };
+
+
+window.buyTemplate = function(templateId) {
+  const template = templates.find(t => t.id === templateId);
+  if (!template) {
+    tg.showAlert("Ошибка: Шаблон не найден.");
+    return;
+  }
+
+  const starsPrice = Math.round(template.price * 100); // $7.49 → 749 Stars
+
+  tg.MainButton.setText(`✅ Подтвердить оплату ${starsPrice} Stars`);
+  tg.MainButton.show();
+
+  tg.MainButton.onClick(() => {
+    // Имитация успешной оплаты
+    tg.showAlert(`Оплата прошла успешно! Скачивание файла...`);
+
+    // Сохраняем конфиг в localStorage
+    localStorage.setItem(`template_${templateId}`, JSON.stringify(template.config));
+
+    // Создаём и скачиваем JSON-файл
+    const blob = new Blob([JSON.stringify(template.config, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${template.name.replace(/\s+/g, '_')}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    // Скрываем кнопку после покупки
+    tg.MainButton.hide();
+  });
+};
 
       renderTemplates(templates);
     }
