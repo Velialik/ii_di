@@ -3,169 +3,632 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Telegram Mini App: Чат и Конструктор</title>
+  <title>Telegram Mini App</title>
   <script src="https://web.telegram.org/k/js/telegram-web-app.js"></script> 
   <style>
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       margin: 0;
       padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background-color: #1a1a1a;
       color: #e0e0e0;
+      height: 100vh;
       display: flex;
       flex-direction: column;
-      height: 100vh;
-      overflow: hidden;
     }
 
-    /* Навигация */
-    .nav {
+    .menu {
+      flex: 1;
       display: flex;
-      justify-content: space-around;
-      background: #252525;
-      border-bottom: 1px solid #333;
-      padding: 10px 0;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      padding: 20px;
     }
 
-    .nav button {
-      background: none;
+    .menu-button {
+      background-color: #0088cc;
+      color: white;
       border: none;
-      color: #ccc;
-      font-size: 16px;
-      padding: 10px;
+      padding: 15px 30px;
+      font-size: 18px;
+      border-radius: 12px;
+      width: 80%;
+      max-width: 300px;
+      text-align: center;
       cursor: pointer;
     }
 
-    .nav button.active {
-      color: #0088cc;
-      font-weight: bold;
+    .menu-button:hover {
+      background-color: #006bb3;
     }
 
-    /* Контент */
-    .content {
+    .back-button {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background-color: #333;
+      color: #ccc;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .back-button:hover {
+      background-color: #444;
+    }
+
+    #chat-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #chat-messages {
       flex: 1;
       overflow-y: auto;
-      padding: 15px;
-      display: none;
+      padding: 20px;
     }
 
-    .content.active {
-      display: block;
+    #input-container {
+      position: sticky;
+      bottom: 0;
+      background: #252525;
+      padding: 15px 20px;
+      display: flex;
+      gap: 10px;
+      box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.2);
+      z-index: 1;
     }
 
-    /* Стили общие */
-    h2 {
-      margin-top: 0;
+    #message-input {
+      flex: 1;
+      background: #333;
+      color: #e0e0e0;
+      border: 1px solid #444;
+      border-radius: 20px;
+      padding: 10px 15px;
+      font-size: 16px;
+      resize: none;
     }
 
-    textarea, input {
-      width: 100%;
-      padding: 10px;
+    #message-input:focus {
+      outline: none;
+      border-color: #0088cc;
+    }
+
+    #send-btn {
+      background: #0088cc;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    #send-btn:hover {
+      background: #006bb3;
+    }
+
+    #welcome-message {
+      text-align: center;
+      color: #888;
+      font-style: italic;
+      margin: 20px 0;
+    }
+
+    .message {
+      max-width: 80%;
+      padding: 10px 15px;
+      margin: 10px 0;
+      border-radius: 15px;
+      line-height: 1.4;
+    }
+
+    .user-message {
+      background: #0088cc;
+      color: white;
+      margin-left: auto;
+      border-bottom-right-radius: 5px;
+    }
+
+    .ai-message {
+      background: #2e2e2e;
+      color: #e0e0e0;
+      border-bottom-left-radius: 5px;
+      position: relative;
+    }
+
+    .ai-message .copy-btn {
+      background: #4a4a4a;
+      color: #e0e0e0;
+      border: none;
+      border-radius: 5px;
+      padding: 5px 10px;
+      cursor: pointer;
+      margin-top: 5px;
+      display: inline-block;
+    }
+
+    .ai-message .copy-btn:hover {
+      background: #5a5a5a;
+    }
+
+    .typing-indicator {
+      background: #2e2e2e;
+      color: #888;
+      padding: 10px 15px;
+      border-radius: 15px;
+      border-bottom-left-radius: 5px;
+      text-align: left;
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0.5; }
+    }
+
+    /* Стили для конструктора */
+    #constructor-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .constructor-section {
+      margin-bottom: 20px;
+    }
+
+    .constructor-section h2 {
+      color: #e0e0e0;
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .constructor-input {
       background: #333;
       color: #e0e0e0;
       border: 1px solid #444;
       border-radius: 8px;
-      resize: vertical;
+      padding: 10px;
       font-size: 16px;
+      width: 100%;
+      box-sizing: border-box;
+      margin-bottom: 10px;
     }
 
-    button {
+    .constructor-input:focus {
+      outline: none;
+      border-color: #0088cc;
+    }
+
+    .button-list, .qa-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .button-item, .qa-item {
+      background: #2e2e2e;
+      padding: 10px;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .button-item button, .qa-item button {
+      background: #4a4a4a;
+      color: #e0e0e0;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      align-self: flex-start;
+    }
+
+    .button-item button:hover, .qa-item button:hover {
+      background: #5a5a5a;
+    }
+
+    #preview-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .button-option {
       background: #0088cc;
       color: white;
       border: none;
-      padding: 10px 20px;
-      margin-top: 10px;
+      padding: 10px;
       border-radius: 8px;
       cursor: pointer;
+      margin: 5px;
+      text-align: center;
     }
 
-    button:hover {
+    .button-option:hover {
       background: #006bb3;
-    }
-
-    .bot-preview {
-      margin-top: 20px;
-      background: #2e2e2e;
-      padding: 15px;
-      border-radius: 10px;
     }
   </style>
 </head>
 <body>
-
-  <!-- Навигационное меню -->
-  <div class="nav">
-    <button id="chat-tab" class="active">Чат с ИИ</button>
-    <button id="builder-tab">Создание ботов</button>
+  <!-- Главное меню -->
+  <div id="main-menu" class="menu">
+    <button class="menu-button" onclick="navigateTo('bots')">Создание чат-ботов</button>
+    <button class="menu-button" onclick="navigateTo('chat')">Чат с ИИ</button>
+    <button class="menu-button" onclick="exitApp()">Выйти</button>
   </div>
 
-  <!-- Вкладка: Чат с ИИ -->
-  <div id="chat-section" class="content active">
-    <!-- Здесь можно вставить ваш существующий код чата -->
-    <iframe src="chat.html" style="width:100%; height:100%; border:none;"></iframe>
-  </div>
-
-  <!-- Вкладка: Визуальный конструктор ботов -->
-  <div id="builder-section" class="content">
-    <h2>Визуальный конструктор ботов</h2>
-    <label>Название бота:</label>
-    <input type="text" id="bot-name" placeholder="Введите название бота"/>
-
-    <label>Приветственное сообщение:</label>
-    <textarea id="bot-greeting" rows="3" placeholder="Здесь текст приветствия..."></textarea>
-
-    <label>Логика ответов (пример):</label>
-    <textarea id="bot-rules" rows="5" placeholder="Если пользователь пишет 'привет', ответь 'Здравствуйте!'&#10;Если пользователь спрашивает о погоде, ответь 'Погода сегодня хорошая'"></textarea>
-
-    <button onclick="previewBot()">Предпросмотр бота</button>
-
-    <div class="bot-preview" id="bot-preview" style="display: none;">
-      <strong>Название:</strong> <span id="p-name"></span><br/>
-      <strong>Приветствие:</strong> <span id="p-greeting"></span><br/>
-      <strong>Правила:</strong><br/>
-      <pre id="p-rules"></pre>
-    </div>
-  </div>
+  <!-- Область для чата или конструктора -->
+  <div id="chat-container" style="display:none;"></div>
 
   <script>
     const tg = window.Telegram.WebApp;
     tg.ready();
     tg.expand();
 
-    // Переключение между вкладками
-    document.getElementById("chat-tab").addEventListener("click", () => switchTab("chat"));
-    document.getElementById("builder-tab").addEventListener("click", () => switchTab("builder"));
-
-    function switchTab(tab) {
-      document.querySelectorAll(".content").forEach(el => el.classList.remove("active"));
-      document.querySelectorAll(".nav button").forEach(el => el.classList.remove("active"));
-
-      if (tab === "chat") {
-        document.getElementById("chat-section").classList.add("active");
-        document.getElementById("chat-tab").classList.add("active");
-      } else {
-        document.getElementById("builder-section").classList.add("active");
-        document.getElementById("builder-tab").classList.add("active");
+    function navigateTo(page) {
+      document.getElementById("main-menu").style.display = "none";
+      document.getElementById("chat-container").style.display = "flex";
+      if (page === "chat") {
+        document.getElementById("chat-container").innerHTML = `
+          <button class="back-button" onclick="goBack()">← Назад</button>
+          <div id="chat-messages">
+            <div id="welcome-message">Привет! Я чат-бот на базе Mistral AI. Задавай свои вопросы!</div>
+          </div>
+          <div id="input-container">
+            <textarea id="message-input" rows="1" placeholder="Введите ваш вопрос..."></textarea>
+            <button id="send-btn" onclick="sendMessage()">➤</button>
+          </div>
+        `;
+        initChatLogic();
+      } else if (page === "bots") {
+        document.getElementById("chat-container").innerHTML = `
+          <button class="back-button" onclick="goBack()">← Назад</button>
+          <div id="constructor-container">
+            <div class="constructor-section">
+              <h2>Создание кнопок</h2>
+              <input type="text" id="button-text" class="constructor-input" placeholder="Текст кнопки">
+              <input type="text" id="button-response" class="constructor-input" placeholder="Ответ на кнопку">
+              <button class="menu-button" onclick="addButton()">Добавить кнопку</button>
+              <div id="button-list" class="button-list"></div>
+            </div>
+            <div class="constructor-section">
+              <h2>Вопросы и ответы</h2>
+              <input type="text" id="question-text" class="constructor-input" placeholder="Вопрос">
+              <input type="text" id="answer-text" class="constructor-input" placeholder="Ответ">
+              <select id="question-buttons" class="constructor-input">
+                <option value="">Без кнопок</option>
+              </select>
+              <button class="menu-button" onclick="addQA()">Добавить вопрос-ответ</button>
+              <div id="qa-list" class="qa-list"></div>
+            </div>
+            <div class="constructor-section">
+              <button class="menu-button" onclick="previewBot()">Предпросмотр бота</button>
+              <button class="menu-button" onclick="exportConfig()">Экспорт JSON</button>
+            </div>
+          </div>
+          <div id="preview-container" style="display:none;"></div>
+        `;
+        initConstructorLogic();
       }
     }
 
-    // Пример логики предпросмотра бота
-    function previewBot() {
-      const name = document.getElementById("bot-name").value.trim();
-      const greeting = document.getElementById("bot-greeting").value.trim();
-      const rules = document.getElementById("bot-rules").value.trim();
+    function goBack() {
+      document.getElementById("chat-container").style.display = "none";
+      document.getElementById("chat-container").innerHTML = "";
+      document.getElementById("main-menu").style.display = "flex";
+    }
 
-      if (!name || !greeting || !rules) {
-        tg.showAlert("Заполните все поля!");
-        return;
+    function exitApp() {
+      tg.close();
+    }
+
+    function initChatLogic() {
+      const apiKey = "NVGs0NXW7CCZ9t5ksRw72rohe6IePBdR"; 
+      const chatMessages = document.getElementById("chat-messages");
+      const messageInput = document.getElementById("message-input");
+      let chatHistory = [];
+
+      messageInput.addEventListener("input", function () {
+        this.style.height = "auto";
+        this.style.height = (this.scrollHeight) + "px";
+        if (this.value === "") this.style.height = "auto";
+      });
+
+      async function sendMessage() {
+        const message = messageInput.value.trim();
+        if (!message) return;
+
+        chatHistory.push({ role: "user", content: message });
+        addMessage(message, "user");
+        messageInput.value = "";
+        messageInput.style.height = "auto";
+
+        const typingDiv = addTypingIndicator();
+
+        try {
+          const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${apiKey}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              model: "mistral-large-latest",
+              messages: chatHistory,
+              max_tokens: 500
+            })
+          });
+
+          if (!response.ok) throw new Error("Ошибка API");
+          const data = await response.json();
+          const reply = data.choices[0].message.content;
+
+          chatHistory.push({ role: "assistant", content: reply });
+          chatMessages.removeChild(typingDiv);
+          addMessage(reply, "ai");
+        } catch (error) {
+          chatMessages.removeChild(typingDiv);
+          addMessage("Произошла ошибка. Попробуйте снова.", "ai");
+          console.error("Error:", error);
+        }
       }
 
-      document.getElementById("p-name").textContent = name;
-      document.getElementById("p-greeting").textContent = greeting;
-      document.getElementById("p-rules").textContent = rules;
+      function addMessage(text, type) {
+        const messageDiv = document.createElement("div");
+        messageDiv.className = `message ${type}-message`;
+        messageDiv.textContent = text;
 
-      document.getElementById("bot-preview").style.display = "block";
-      tg.showAlert("Бот подготовлен к сохранению или экспорту.");
+        if (type === "ai") {
+          const copyBtn = document.createElement("button");
+          copyBtn.textContent = "Копировать";
+          copyBtn.className = "copy-btn";
+          copyBtn.onclick = () => copyToClipboard(text);
+          messageDiv.appendChild(document.createElement("br"));
+          messageDiv.appendChild(copyBtn);
+        }
+
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      function addTypingIndicator() {
+        const typingDiv = document.createElement("div");
+        typingDiv.className = "message ai-message typing-indicator";
+        typingDiv.textContent = "Mistral AI печатает...";
+        chatMessages.appendChild(typingDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        return typingDiv;
+      }
+
+      function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(() => {
+          tg.showAlert("Текст скопирован в буфер обмена!");
+        }).catch(() => {
+          tg.showAlert("Не удалось скопировать текст.");
+        });
+      }
+
+      messageInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
+
+      window.sendMessage = sendMessage;
+    }
+
+    function initConstructorLogic() {
+      const buttonList = document.getElementById("button-list");
+      const qaList = document.getElementById("qa-list");
+      const questionButtons = document.getElementById("question-buttons");
+      let botConfig = {
+        buttons: [],
+        qaPairs: []
+      };
+
+      function updateButtonOptions() {
+        questionButtons.innerHTML = '<option value="">Без кнопок</option>';
+        botConfig.buttons.forEach((btn, index) => {
+          const option = document.createElement("option");
+          option.value = index;
+          option.textContent = btn.text;
+          questionButtons.appendChild(option);
+        });
+      }
+
+      window.addButton = function() {
+        const buttonText = document.getElementById("button-text").value.trim();
+        const buttonResponse = document.getElementById("button-response").value.trim();
+        if (!buttonText || !buttonResponse) {
+          tg.showAlert("Введите текст кнопки и ответ!");
+          return;
+        }
+
+        botConfig.buttons.push({ id: `btn-${botConfig.buttons.length}`, text: buttonText, response: buttonResponse });
+        document.getElementById("button-text").value = "";
+        document.getElementById("button-response").value = "";
+        renderButtons();
+        updateButtonOptions();
+      };
+
+      window.addQA = function() {
+        const question = document.getElementById("question-text").value.trim();
+        const answer = document.getElementById("answer-text").value.trim();
+        const selectedButtonIndex = document.getElementById("question-buttons").value;
+        if (!question || !answer) {
+          tg.showAlert("Введите вопрос и ответ!");
+          return;
+        }
+
+        const qa = {
+          id: `qa-${botConfig.qaPairs.length}`,
+          question,
+          answer,
+          buttons: selectedButtonIndex ? [botConfig.buttons[selectedButtonIndex].id] : []
+        };
+        botConfig.qaPairs.push(qa);
+        document.getElementById("question-text").value = "";
+        document.getElementById("answer-text").value = "";
+        document.getElementById("question-buttons").value = "";
+        renderQA();
+      };
+
+      window.deleteButton = function(index) {
+        botConfig.buttons.splice(index, 1);
+        botConfig.qaPairs.forEach(qa => {
+          qa.buttons = qa.buttons.filter(btnId => btnId !== `btn-${index}`);
+        });
+        renderButtons();
+        renderQA();
+        updateButtonOptions();
+      };
+
+      window.deleteQA = function(index) {
+        botConfig.qaPairs.splice(index, 1);
+        renderQA();
+      };
+
+      function renderButtons() {
+        buttonList.innerHTML = "";
+        botConfig.buttons.forEach((btn, index) => {
+          const buttonItem = document.createElement("div");
+          buttonItem.className = "button-item";
+          buttonItem.innerHTML = `
+            <span>Кнопка: ${btn.text}</span>
+            <span>Ответ: ${btn.response}</span>
+            <button onclick="deleteButton(${index})">Удалить</button>
+          `;
+          buttonList.appendChild(buttonItem);
+        });
+      }
+
+      function renderQA() {
+        qaList.innerHTML = "";
+        botConfig.qaPairs.forEach((qa, index) => {
+          const qaItem = document.createElement("div");
+          qaItem.className = "qa-item";
+          const buttonText = qa.buttons.length > 0 ? botConfig.buttons.find(btn => btn.id === qa.buttons[0])?.text || "Нет кнопки" : "Без кнопок";
+          qaItem.innerHTML = `
+            <span>Вопрос: ${qa.question}</span>
+            <span>Ответ: ${qa.answer}</span>
+            <span>Кнопки: ${buttonText}</span>
+            <button onclick="deleteQA(${index})">Удалить</button>
+          `;
+          qaList.appendChild(qaItem);
+        });
+      }
+
+      window.exportConfig = function() {
+        const blob = new Blob([JSON.stringify(botConfig, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'bot-config.json';
+        a.click();
+        URL.revokeObjectURL(url);
+        tg.showAlert("Конфигурация бота экспортирована!");
+      };
+
+      window.previewBot = function() {
+        document.getElementById("constructor-container").style.display = "none";
+        const previewContainer = document.getElementById("preview-container");
+        previewContainer.style.display = "flex";
+        previewContainer.innerHTML = `
+          <button class="back-button" onclick="backToConstructor()">← Назад к конструктору</button>
+          <div id="chat-messages">
+            <div id="welcome-message">Добро пожаловать в предпросмотр бота!</div>
+          </div>
+          <div id="input-container">
+            <textarea id="message-input" rows="1" placeholder="Введите ваш вопрос..."></textarea>
+            <button id="send-btn" onclick="sendPreviewMessage()">➤</button>
+          </div>
+        `;
+        initPreviewLogic();
+      };
+
+      window.backToConstructor = function() {
+        document.getElementById("preview-container").style.display = "none";
+        document.getElementById("constructor-container").style.display = "flex";
+      };
+
+      function initPreviewLogic() {
+        const chatMessages = document.getElementById("chat-messages");
+        const messageInput = document.getElementById("message-input");
+
+        messageInput.addEventListener("input", function () {
+          this.style.height = "auto";
+          this.style.height = (this.scrollHeight) + "px";
+          if (this.value === "") this.style.height = "auto";
+        });
+
+        window.sendPreviewMessage = function() {
+          const message = messageInput.value.trim();
+          if (!message) return;
+
+          addMessage(message, "user");
+          messageInput.value = "";
+          messageInput.style.height = "auto";
+
+          const qa = botConfig.qaPairs.find(q => q.question.toLowerCase() === message.toLowerCase());
+          if (qa) {
+            addMessage(qa.answer, "ai");
+            if (qa.buttons.length > 0) {
+              const button = botConfig.buttons.find(btn => btn.id === qa.buttons[0]);
+              if (button) {
+                const buttonDiv = document.createElement("div");
+                buttonDiv.className = "message ai-message";
+                buttonDiv.innerHTML = `<button class="button-option" onclick="handleButtonClick('${button.id}')">${button.text}</button>`;
+                chatMessages.appendChild(buttonDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+              }
+            }
+          } else {
+            addMessage("Извините, я не знаю ответа на этот вопрос.", "ai");
+          }
+        };
+
+        window.handleButtonClick = function(buttonId) {
+          const button = botConfig.buttons.find(btn => btn.id === buttonId);
+          if (button) {
+            addMessage(button.text, "user");
+            addMessage(button.response, "ai");
+          }
+        };
+
+        function addMessage(text, type) {
+          const messageDiv = document.createElement("div");
+          messageDiv.className = `message ${type}-message`;
+          messageDiv.textContent = text;
+          chatMessages.appendChild(messageDiv);
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        messageInput.addEventListener("keypress", (e) => {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            sendPreviewMessage();
+          }
+        });
+      }
+
+      updateButtonOptions();
     }
   </script>
 </body>
