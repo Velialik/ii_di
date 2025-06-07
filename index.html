@@ -177,8 +177,8 @@
       50% { opacity: 0.5; }
     }
 
-    /* Стили для конструктора */
-    #constructor-container {
+    /* Стили для маркета шаблонов */
+    #market-container {
       flex: 1;
       display: flex;
       flex-direction: column;
@@ -186,17 +186,55 @@
       overflow-y: auto;
     }
 
-    .constructor-section {
+    .template-card {
+      background: #2e2e2e;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .template-card h3 {
+      margin: 0;
+      font-size: 18px;
+      color: #e0e0e0;
+    }
+
+    .template-card p {
+      margin: 0;
+      font-size: 14px;
+      color: #aaa;
+    }
+
+    .template-card .price {
+      font-size: 16px;
+      color: #0088cc;
+      font-weight: bold;
+    }
+
+    .template-card .buy-button {
+      background: #0088cc;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      align-self: flex-start;
+    }
+
+    .template-card .buy-button:hover {
+      background: #006bb3;
+    }
+
+    .filter-section {
       margin-bottom: 20px;
     }
 
-    .constructor-section h2 {
-      color: #e0e0e0;
-      font-size: 18px;
-      margin-bottom: 10px;
-    }
-
-    .constructor-input {
+    .filter-section select {
       background: #333;
       color: #e0e0e0;
       border: 1px solid #444;
@@ -205,75 +243,22 @@
       font-size: 16px;
       width: 100%;
       box-sizing: border-box;
-      margin-bottom: 10px;
     }
 
-    .constructor-input:focus {
+    .filter-section select:focus {
       outline: none;
       border-color: #0088cc;
-    }
-
-    .button-list, .qa-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .button-item, .qa-item {
-      background: #2e2e2e;
-      padding: 10px;
-      border-radius: 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .button-item button, .qa-item button {
-      background: #4a4a4a;
-      color: #e0e0e0;
-      border: none;
-      padding: 5px 10px;
-      border-radius: 5px;
-      cursor: pointer;
-      align-self: flex-start;
-    }
-
-    .button-item button:hover, .qa-item button:hover {
-      background: #5a5a5a;
-    }
-
-    #preview-container {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-    }
-
-    .button-option {
-      background: #0088cc;
-      color: white;
-      border: none;
-      padding: 10px;
-      border-radius: 8px;
-      cursor: pointer;
-      margin: 5px;
-      text-align: center;
-    }
-
-    .button-option:hover {
-      background: #006bb3;
     }
   </style>
 </head>
 <body>
   <!-- Главное меню -->
   <div id="main-menu" class="menu">
-    <button class="menu-button" onclick="navigateTo('bots')">Создание чат-ботов</button>
+    <button class="menu-button" onclick="navigateTo('market')">Маркет шаблонов</button>
     <button class="menu-button" onclick="navigateTo('chat')">Чат с ИИ</button>
-    <button class="menu-button" onclick="exitApp()">Выйти</button>
   </div>
 
-  <!-- Область для чата или конструктора -->
+  <!-- Область для чата или маркета -->
   <div id="chat-container" style="display:none;"></div>
 
   <script>
@@ -288,7 +273,7 @@
         document.getElementById("chat-container").innerHTML = `
           <button class="back-button" onclick="goBack()">← Назад</button>
           <div id="chat-messages">
-            <div id="welcome-message">Привет! Задавай свои вопросы!</div>
+            <div id="welcome-message">Привет! Я чат-бот на базе Mistral AI. Задавай свои вопросы!</div>
           </div>
           <div id="input-container">
             <textarea id="message-input" rows="1" placeholder="Введите ваш вопрос..."></textarea>
@@ -296,35 +281,23 @@
           </div>
         `;
         initChatLogic();
-      } else if (page === "bots") {
+      } else if (page === "market") {
         document.getElementById("chat-container").innerHTML = `
           <button class="back-button" onclick="goBack()">← Назад</button>
-          <div id="constructor-container">
-            <div class="constructor-section">
-              <h2>Создание кнопок</h2>
-              <input type="text" id="button-text" class="constructor-input" placeholder="Текст кнопки">
-              <input type="text" id="button-response" class="constructor-input" placeholder="Ответ на кнопку">
-              <button class="menu-button" onclick="addButton()">Добавить кнопку</button>
-              <div id="button-list" class="button-list"></div>
-            </div>
-            <div class="constructor-section">
-              <h2>Вопросы и ответы</h2>
-              <input type="text" id="question-text" class="constructor-input" placeholder="Вопрос">
-              <input type="text" id="answer-text" class="constructor-input" placeholder="Ответ">
-              <select id="question-buttons" class="constructor-input">
-                <option value="">Без кнопок</option>
+          <div id="market-container">
+            <div class="filter-section">
+              <select id="filter-select" onchange="filterTemplates()">
+                <option value="default">По умолчанию</option>
+                <option value="price-asc">По цене (возрастание)</option>
+                <option value="price-desc">По цене (убывание)</option>
+                <option value="date-asc">По дате (старые)</option>
+                <option value="date-desc">По дате (новые)</option>
               </select>
-              <button class="menu-button" onclick="addQA()">Добавить вопрос-ответ</button>
-              <div id="qa-list" class="qa-list"></div>
             </div>
-            <div class="constructor-section">
-              <button class="menu-button" onclick="previewBot()">Предпросмотр бота</button>
-              <button class="menu-button" onclick="exportConfig()">Экспорт JSON</button>
-            </div>
+            <div id="template-list"></div>
           </div>
-          <div id="preview-container" style="display:none;"></div>
         `;
-        initConstructorLogic();
+        initMarketLogic();
       }
     }
 
@@ -332,10 +305,7 @@
       document.getElementById("chat-container").style.display = "none";
       document.getElementById("chat-container").innerHTML = "";
       document.getElementById("main-menu").style.display = "flex";
-    }
-
-    function exitApp() {
-      tg.close();
+      tg.MainButton.hide();
     }
 
     function initChatLogic() {
@@ -434,201 +404,102 @@
       window.sendMessage = sendMessage;
     }
 
-    function initConstructorLogic() {
-      const buttonList = document.getElementById("button-list");
-      const qaList = document.getElementById("qa-list");
-      const questionButtons = document.getElementById("question-buttons");
-      let botConfig = {
-        buttons: [],
-        qaPairs: []
-      };
+    function initMarketLogic() {
+      const templateList = document.getElementById("template-list");
+      const templates = [
+        {
+          id: 1,
+          name: "Приветственный бот",
+          description: "Шаблон для приветствия новых пользователей и предоставления базовой информации.",
+          price: 5.99,
+          createdAt: "2025-06-01T10:00:00Z",
+          config: {
+            buttons: [{ id: "btn-1", text: "Информация", response: "Это приветственный бот!" }],
+            qaPairs: [{ id: "qa-1", question: "Привет", answer: "Здравствуй! Чем могу помочь?", buttons: ["btn-1"] }]
+          }
+        },
+        {
+          id: 2,
+          name: "Бот для продаж",
+          description: "Шаблон для обработки заказов и консультаций по продуктам.",
+          price: 9.99,
+          createdAt: "2025-06-03T12:00:00Z",
+          config: {
+            buttons: [
+              { id: "btn-2", text: "Купить", response: "Спасибо за покупку!" },
+              { id: "btn-3", text: "Подробнее", response: "Вот описание продукта..." }
+            ],
+            qaPairs: [{ id: "qa-2", question: "Что вы продаете?", answer: "Мы продаем крутые продукты!", buttons: ["btn-2", "btn-3"] }]
+          }
+        },
+        {
+          id: 3,
+          name: "FAQ Бот",
+          description: "Шаблон для ответов на часто задаваемые вопросы.",
+          price: 7.49,
+          createdAt: "2025-06-02T15:00:00Z",
+          config: {
+            buttons: [{ id: "btn-4", text: "Другое", response: "Задайте свой вопрос!" }],
+            qaPairs: [{ id: "qa-3", question: "Как связаться?", answer: "Напишите нам в поддержку!", buttons: ["btn-4"] }]
+          }
+        }
+      ];
 
-      function updateButtonOptions() {
-        questionButtons.innerHTML = '<option value="">Без кнопок</option>';
-        botConfig.buttons.forEach((btn, index) => {
-          const option = document.createElement("option");
-          option.value = index;
-          option.textContent = btn.text;
-          questionButtons.appendChild(option);
+      function renderTemplates(templatesToRender) {
+        templateList.innerHTML = "";
+        templatesToRender.forEach(template => {
+          const card = document.createElement("div");
+          card.className = "template-card";
+          card.innerHTML = `
+            <h3>${template.name}</h3>
+            <p>${template.description}</p>
+            <span class="price">$${template.price.toFixed(2)} (${Math.round(template.price * 100)} Stars)</span>
+            <button class="buy-button" onclick="buyTemplate(${template.id})">Купить</button>
+          `;
+          templateList.appendChild(card);
         });
       }
 
-      window.addButton = function() {
-        const buttonText = document.getElementById("button-text").value.trim();
-        const buttonResponse = document.getElementById("button-response").value.trim();
-        if (!buttonText || !buttonResponse) {
-          tg.showAlert("Введите текст кнопки и ответ!");
+      window.filterTemplates = function() {
+        const filter = document.getElementById("filter-select").value;
+        let filteredTemplates = [...templates];
+        if (filter === "price-asc") {
+          filteredTemplates.sort((a, b) => a.price - b.price);
+        } else if (filter === "price-desc") {
+          filteredTemplates.sort((a, b) => b.price - a.price);
+        } else if (filter === "date-asc") {
+          filteredTemplates.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+        } else if (filter === "date-desc") {
+          filteredTemplates.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        }
+        renderTemplates(filteredTemplates);
+      };
+
+      window.buyTemplate = function(templateId) {
+        const template = templates.find(t => t.id === templateId);
+        if (!template) {
+          tg.showAlert("Ошибка: Шаблон не найден.");
           return;
         }
-
-        botConfig.buttons.push({ id: `btn-${botConfig.buttons.length}`, text: buttonText, response: buttonResponse });
-        document.getElementById("button-text").value = "";
-        document.getElementById("button-response").value = "";
-        renderButtons();
-        updateButtonOptions();
-      };
-
-      window.addQA = function() {
-        const question = document.getElementById("question-text").value.trim();
-        const answer = document.getElementById("answer-text").value.trim();
-        const selectedButtonIndex = document.getElementById("question-buttons").value;
-        if (!question || !answer) {
-          tg.showAlert("Введите вопрос и ответ!");
-          return;
-        }
-
-        const qa = {
-          id: `qa-${botConfig.qaPairs.length}`,
-          question,
-          answer,
-          buttons: selectedButtonIndex ? [botConfig.buttons[selectedButtonIndex].id] : []
-        };
-        botConfig.qaPairs.push(qa);
-        document.getElementById("question-text").value = "";
-        document.getElementById("answer-text").value = "";
-        document.getElementById("question-buttons").value = "";
-        renderQA();
-      };
-
-      window.deleteButton = function(index) {
-        botConfig.buttons.splice(index, 1);
-        botConfig.qaPairs.forEach(qa => {
-          qa.buttons = qa.buttons.filter(btnId => btnId !== `btn-${index}`);
+        const starsPrice = Math.round(template.price * 100); // 1 USD = 100 Stars
+        tg.MainButton.setText(`Купить за ${starsPrice} Stars`);
+        tg.MainButton.show();
+        tg.MainButton.onClick(() => {
+          // Имитация успешной оплаты
+          localStorage.setItem(`template_${templateId}`, JSON.stringify(template.config));
+          const blob = new Blob([JSON.stringify(template.config, null, 2)], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `template_${templateId}.json`;
+          a.click();
+          URL.revokeObjectURL(url);
+          tg.showAlert(`Шаблон "${template.name}" куплен за ${starsPrice} Stars! Конфигурация скачана.`);
+          tg.MainButton.hide();
         });
-        renderButtons();
-        renderQA();
-        updateButtonOptions();
       };
 
-      window.deleteQA = function(index) {
-        botConfig.qaPairs.splice(index, 1);
-        renderQA();
-      };
-
-      function renderButtons() {
-        buttonList.innerHTML = "";
-        botConfig.buttons.forEach((btn, index) => {
-          const buttonItem = document.createElement("div");
-          buttonItem.className = "button-item";
-          buttonItem.innerHTML = `
-            <span>Кнопка: ${btn.text}</span>
-            <span>Ответ: ${btn.response}</span>
-            <button onclick="deleteButton(${index})">Удалить</button>
-          `;
-          buttonList.appendChild(buttonItem);
-        });
-      }
-
-      function renderQA() {
-        qaList.innerHTML = "";
-        botConfig.qaPairs.forEach((qa, index) => {
-          const qaItem = document.createElement("div");
-          qaItem.className = "qa-item";
-          const buttonText = qa.buttons.length > 0 ? botConfig.buttons.find(btn => btn.id === qa.buttons[0])?.text || "Нет кнопки" : "Без кнопок";
-          qaItem.innerHTML = `
-            <span>Вопрос: ${qa.question}</span>
-            <span>Ответ: ${qa.answer}</span>
-            <span>Кнопки: ${buttonText}</span>
-            <button onclick="deleteQA(${index})">Удалить</button>
-          `;
-          qaList.appendChild(qaItem);
-        });
-      }
-
-      window.exportConfig = function() {
-        const blob = new Blob([JSON.stringify(botConfig, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'bot-config.json';
-        a.click();
-        URL.revokeObjectURL(url);
-        tg.showAlert("Конфигурация бота экспортирована!");
-      };
-
-      window.previewBot = function() {
-        document.getElementById("constructor-container").style.display = "none";
-        const previewContainer = document.getElementById("preview-container");
-        previewContainer.style.display = "flex";
-        previewContainer.innerHTML = `
-          <button class="back-button" onclick="backToConstructor()">← Назад к конструктору</button>
-          <div id="chat-messages">
-            <div id="welcome-message">Добро пожаловать в предпросмотр бота!</div>
-          </div>
-          <div id="input-container">
-            <textarea id="message-input" rows="1" placeholder="Введите ваш вопрос..."></textarea>
-            <button id="send-btn" onclick="sendPreviewMessage()">➤</button>
-          </div>
-        `;
-        initPreviewLogic();
-      };
-
-      window.backToConstructor = function() {
-        document.getElementById("preview-container").style.display = "none";
-        document.getElementById("constructor-container").style.display = "flex";
-      };
-
-      function initPreviewLogic() {
-        const chatMessages = document.getElementById("chat-messages");
-        const messageInput = document.getElementById("message-input");
-
-        messageInput.addEventListener("input", function () {
-          this.style.height = "auto";
-          this.style.height = (this.scrollHeight) + "px";
-          if (this.value === "") this.style.height = "auto";
-        });
-
-        window.sendPreviewMessage = function() {
-          const message = messageInput.value.trim();
-          if (!message) return;
-
-          addMessage(message, "user");
-          messageInput.value = "";
-          messageInput.style.height = "auto";
-
-          const qa = botConfig.qaPairs.find(q => q.question.toLowerCase() === message.toLowerCase());
-          if (qa) {
-            addMessage(qa.answer, "ai");
-            if (qa.buttons.length > 0) {
-              const button = botConfig.buttons.find(btn => btn.id === qa.buttons[0]);
-              if (button) {
-                const buttonDiv = document.createElement("div");
-                buttonDiv.className = "message ai-message";
-                buttonDiv.innerHTML = `<button class="button-option" onclick="handleButtonClick('${button.id}')">${button.text}</button>`;
-                chatMessages.appendChild(buttonDiv);
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-              }
-            }
-          } else {
-            addMessage("Извините, я не знаю ответа на этот вопрос.", "ai");
-          }
-        };
-
-        window.handleButtonClick = function(buttonId) {
-          const button = botConfig.buttons.find(btn => btn.id === buttonId);
-          if (button) {
-            addMessage(button.text, "user");
-            addMessage(button.response, "ai");
-          }
-        };
-
-        function addMessage(text, type) {
-          const messageDiv = document.createElement("div");
-          messageDiv.className = `message ${type}-message`;
-          messageDiv.textContent = text;
-          chatMessages.appendChild(messageDiv);
-          chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        messageInput.addEventListener("keypress", (e) => {
-          if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault();
-            sendPreviewMessage();
-          }
-        });
-      }
-
-      updateButtonOptions();
+      renderTemplates(templates);
     }
   </script>
 </body>
